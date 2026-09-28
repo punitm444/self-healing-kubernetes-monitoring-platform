@@ -1,0 +1,27 @@
+---
+- name: Install Helm on K3s server
+  hosts: k3s
+  become: true
+
+  tasks:
+
+    - name: Download Helm installation script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        dest: /tmp/get-helm-3
+        mode: '0755'
+
+    - name: Install Helm
+      ansible.builtin.command:
+        cmd: /tmp/get-helm-3
+        creates: /usr/local/bin/helm
+
+    - name: Verify Helm installation
+      ansible.builtin.command:
+        cmd: /usr/local/bin/helm version
+      register: helm_version
+      changed_when: false
+
+    - name: Display Helm version
+      ansible.builtin.debug:
+        msg: "{{ helm_version.stdout }}"

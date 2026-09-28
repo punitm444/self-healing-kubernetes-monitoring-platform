@@ -1,0 +1,44 @@
+server:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  persistentVolume:
+    enabled: false
+
+alertmanager:
+  enabled: false
+
+kube-state-metrics:
+  enabled: false
+
+prometheus-node-exporter:
+  enabled: false
+
+prometheus-pushgateway:
+  enabled: false
+
+extraScrapeConfigs: |
+  - job_name: 'fastapi-app'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'fastapi-service.self-healing.svc.cluster.local:80'
+
+serverFiles:
+  alerting_rules.yml:
+    groups:
+      - name: fastapi-alerts
+        rules:
+          - alert: FastAPIHighErrorRate
+            expr: rate(app_errors_total[5m]) > 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "FastAPI application is returning errors"
+              description: "The FastAPI application has recorded errors for more than 1 minute."
