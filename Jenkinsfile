@@ -7,6 +7,7 @@ pipeline {
         ECR_REPOSITORY = 'self-healing-platform'
         IMAGE_NAME = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
         CONTAINER_NAME = 'self-healing-test'
+        REMEDIATION_IMAGE = "${ECR_REGISTRY}/${ECR_REPOSITORY}:remediation-${BUILD_NUMBER}"
     }
 
     stages {
@@ -58,10 +59,28 @@ pipeline {
             }
         }
 
-        stage('Push Image to ECR') {
+        stage('Push Main Image to ECR') {
             steps {
                 sh '''
                     docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                '''
+            }
+        }
+
+        stage('Build Remediation Image') {
+            steps {
+                sh '''
+                    docker build \
+                      -t ${REMEDIATION_IMAGE} \
+                      ./remediation
+                '''
+            }
+        }
+
+        stage('Push Remediation Image to ECR') {
+            steps {
+                sh '''
+                    docker push ${REMEDIATION_IMAGE}
                 '''
             }
         }
@@ -71,6 +90,7 @@ pipeline {
                 sh '''
                     docker rm -f ${CONTAINER_NAME} || true
                     docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true
+                    docker rmi ${REMEDIATION_IMAGE} || true
                 '''
             }
         }
