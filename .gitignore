@@ -1,6 +1,36 @@
-.venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Environment variables
 .env
+.env.*
+!.env.example
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+
+# Secrets / credentials
+*.pem
+*.key
+credentials
+credentials.*
+kubeconfig
+*kubeconfig*
+
+# Logs
+*.log
+
+# IDE
 .vscode/
 .idea/
+
+# OS
+.DS_Store
+Thumbs.db
